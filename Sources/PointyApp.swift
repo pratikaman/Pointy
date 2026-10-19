@@ -48,7 +48,7 @@ struct ContentView: View {
                                 CursorTile(selected: model.selectedID == CursorChoice.file(url).id) {
                                     model.apply(.file(url))
                                 } content: {
-                                    if let img = NSImage(contentsOf: url) {
+                                    if let img = PointyModel.previewImage(url) {
                                         Image(nsImage: img)
                                             .resizable()
                                             .scaledToFit()

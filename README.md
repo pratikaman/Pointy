@@ -10,6 +10,7 @@ Your Mac's cursor has been the same arrow since 1984. That is a very long time t
 
 - 🍕 🍌 🦄 🔥 👾 🍩 ⚡️ 🌵 🎯 🐝 🍄 🪄 — 12 built-in emoji cursors, zero effort
 - **Bring your own images** — drop in any picture (transparent PNGs look crispest)
+- **Animated cursors** — drop in a Windows `.ani` file and it animates (macOS caps cursors at 24 frames, so longer ones get thinned out)
 - A **"Click point"** picker: click with the top-left tip like a civilized arrow user, or with the center like a chaos gremlin
 - **Reset to Default** — one click, for when someone important walks by
 - The cursor stays swapped even after you quit the app. It goes back to normal when you restart your Mac — just open Pointy again and it re-applies your last pick

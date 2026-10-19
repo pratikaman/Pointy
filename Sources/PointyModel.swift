@@ -59,14 +59,23 @@ final class PointyModel: ObservableObject {
     }
 
     func apply(_ choice: CursorChoice) {
-        let images: [CGImage]
+        var images: [CGImage] = []
+        var frameCount = 1
+        var frameDuration: CGFloat = 0
         switch choice {
         case .emoji(let e): images = CursorEngine.emojiImages(e)
+        case .file(let url) where Self.isAnimated(url):
+            if let data = try? Data(contentsOf: url), let ani = CursorEngine.aniFrames(data) {
+                images = CursorEngine.stripImages(ani.frames)
+                frameCount = ani.frames.count
+                frameDuration = ani.frameDuration
+            }
         case .file(let url): images = CursorEngine.fileImages(url)
         }
         guard images.count == 2 else { return }
 
-        let ok = CursorEngine.applyArrow(images: images, hotspot: hotspot)
+        let ok = CursorEngine.applyArrow(images: images, hotspot: hotspot,
+                                         frameCount: frameCount, frameDuration: frameDuration)
         blocked = !ok
         themingActive = CursorEngine.pointerThemingActive()
         selectedID = choice.id
@@ -96,6 +105,19 @@ final class PointyModel: ObservableObject {
 
     // MARK: - Imported images
 
+    static func isAnimated(_ url: URL) -> Bool {
+        url.pathExtension.lowercased() == "ani"
+    }
+
+    /// Tile thumbnail; animated cursors show their first frame.
+    static func previewImage(_ url: URL) -> NSImage? {
+        guard isAnimated(url) else { return NSImage(contentsOf: url) }
+        guard let data = try? Data(contentsOf: url), let first = CursorEngine.aniFrames(data)?.frames.first else {
+            return nil
+        }
+        return NSImage(cgImage: first, size: .zero)
+    }
+
     private func rescanImported() {
         let files = (try? FileManager.default.contentsOfDirectory(
             at: Self.cursorsDirectory, includingPropertiesForKeys: nil
@@ -107,9 +129,9 @@ final class PointyModel: ObservableObject {
 
     func importImages() {
         let panel = NSOpenPanel()
-        panel.allowedContentTypes = [.image]
+        panel.allowedContentTypes = [.image] + [UTType(filenameExtension: "ani")].compactMap { $0 }
         panel.allowsMultipleSelection = true
-        panel.message = "Choose images to use as cursors (transparent PNGs look best)"
+        panel.message = "Choose images or animated .ani cursors (transparent PNGs look best)"
         guard panel.runModal() == .OK else { return }
 
         var lastCopied: URL?
